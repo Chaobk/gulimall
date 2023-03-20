@@ -98,7 +98,6 @@ public class ScheduleJobController {
 	 */
 	@SysLog("立即执行任务")
 	@RequestMapping("/run")
-("sys:schedule:run")
 	public R run(@RequestBody Long[] jobIds){
 		scheduleJobService.run(jobIds);
 		
@@ -110,7 +109,6 @@ public class ScheduleJobController {
 	 */
 	@SysLog("暂停定时任务")
 	@RequestMapping("/pause")
-("sys:schedule:pause")
 	public R pause(@RequestBody Long[] jobIds){
 		scheduleJobService.pause(jobIds);
 		
@@ -122,7 +120,6 @@ public class ScheduleJobController {
 	 */
 	@SysLog("恢复定时任务")
 	@RequestMapping("/resume")
-("sys:schedule:resume")
 	public R resume(@RequestBody Long[] jobIds){
 		scheduleJobService.resume(jobIds);
 		
