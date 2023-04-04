@@ -10,5 +10,5 @@ import javax.annotation.Resource;
 @FeignClient("gulimall-coupon")
 public interface CouponFeignService {
     @RequestMapping("/coupon/coupon/member/list")
-    public R membercoupons();
+    R membercoupons();
 }

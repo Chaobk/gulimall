@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * @author: gxz  514190950@qq.com
  **/
 public class MongoScanner {
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private MongoCollection<Document> collection;
 
@@ -270,8 +270,8 @@ public class MongoScanner {
      * 功能描述:forkJoin多线程框架的实现  通过业务拆分获得属性名
      */
     class ForkJoinGetProcessName extends RecursiveTask<List<String>> {
-        private int begin; //查询开始位置
-        private int end;
+        private final int begin; //查询开始位置
+        private final int end;
         private final int THRESHOLD = 5000;
 
         ForkJoinGetProcessName(int begin, int end) {

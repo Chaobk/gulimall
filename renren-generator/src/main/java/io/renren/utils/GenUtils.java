@@ -273,7 +273,7 @@ public class GenUtils {
      * 表名转换成Java类名
      */
     public static String tableToJava(String tableName, String[] tablePrefixArray) {
-        if (null != tablePrefixArray && tablePrefixArray.length > 0) {
+        if (null != tablePrefixArray) {
             for (String tablePrefix : tablePrefixArray) {
                   if (tableName.startsWith(tablePrefix)){
                     tableName = tableName.replaceFirst(tablePrefix, "");

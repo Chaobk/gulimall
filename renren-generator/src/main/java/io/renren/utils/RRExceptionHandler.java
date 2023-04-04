@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Component
 public class RRExceptionHandler implements HandlerExceptionResolver {
-	private Logger logger = LoggerFactory.getLogger(getClass());
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 	
 	@Override
 	public ModelAndView resolveException(HttpServletRequest request,
@@ -32,7 +32,7 @@ public class RRExceptionHandler implements HandlerExceptionResolver {
 			
 			if (ex instanceof RRException) {
 				r.put("code", ((RRException) ex).getCode());
-				r.put("msg", ((RRException) ex).getMessage());
+				r.put("msg", ex.getMessage());
 			}else if(ex instanceof DuplicateKeyException){
 				r = R.error("数据库中已存在该记录");
 			}else{
