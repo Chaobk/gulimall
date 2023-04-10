@@ -3,10 +3,14 @@ package com.atguigu.gulimall.product;
 import com.atguigu.gulimall.product.entity.BrandEntity;
 import com.atguigu.gulimall.product.service.BrandService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.netflix.client.ClientException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.List;
 
 @SpringBootTest
@@ -30,4 +34,9 @@ class GulimallProductApplicationTests {
         System.out.println(brandId);
     }
 
+    @Test
+    void testUpload() {
+
+
+    }
 }

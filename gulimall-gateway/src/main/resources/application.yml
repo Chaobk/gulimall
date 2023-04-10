@@ -19,6 +19,13 @@ spring:
           filters:
             - RewritePath=/api/(?<segment>.*), /$\{segment}
 
+        - id: third_party_route
+          uri: lb://gulimall-third-party
+          predicates:
+            - Path=/api/thirdparty/**
+          filters:
+            - RewritePath=/api/thirdparty/(?<segment>.*), /$\{segment}
+
         # 配置顺序和优先级有关，所以通用的放在下边
         - id: admin_route
           uri: lb://renren-fast
