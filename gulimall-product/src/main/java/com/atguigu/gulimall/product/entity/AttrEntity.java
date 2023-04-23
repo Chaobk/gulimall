@@ -57,4 +57,18 @@ public class AttrEntity implements Serializable {
 	 */
 	private Integer showDesc;
 
+	@Override
+	public String toString() {
+		return "AttrEntity{" +
+				"attrId=" + attrId +
+				", attrName='" + attrName + '\'' +
+				", searchType=" + searchType +
+				", icon='" + icon + '\'' +
+				", valueSelect='" + valueSelect + '\'' +
+				", attrType=" + attrType +
+				", enable=" + enable +
+				", catelogId=" + catelogId +
+				", showDesc=" + showDesc +
+				'}';
+	}
 }
