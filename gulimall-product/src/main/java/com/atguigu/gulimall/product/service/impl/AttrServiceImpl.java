@@ -101,7 +101,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                 attrRespVo.setGroupName(attrGroupDao.selectById(attrAttrgroupRelationEntity.getAttrGroupId()).getAttrGroupName());
             }
 
-            CategoryEntity categoryEntity = categoryDao.selectById(attrRespVo.getAttrId());
+            CategoryEntity categoryEntity = categoryDao.selectById(attrRespVo.getCatelogId());
             if (categoryEntity != null) {
                 attrRespVo.setCatelogName(categoryEntity.getName());
             }
@@ -147,12 +147,17 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         AttrEntity attrEntity = new AttrEntity();
         BeanUtils.copyProperties(attr, attrEntity);
         this.updateById(attrEntity);
-
         // 1.修改分组关联
         AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
         relationEntity.setAttrGroupId(attr.getAttrGroupId());
         relationEntity.setAttrId(attr.getAttrId());
-        relationDao.update(relationEntity, new UpdateWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", relationEntity.getAttrId()));
+
+        Integer count = relationDao.selectCount(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", relationEntity.getAttrId()));
+        if (count > 0) {
+            relationDao.update(relationEntity, new UpdateWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", relationEntity.getAttrId()));
+        } else {
+            relationDao.insert(relationEntity);
+        }
     }
 
 }
