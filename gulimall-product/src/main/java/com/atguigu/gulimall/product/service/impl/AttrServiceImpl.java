@@ -97,7 +97,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             BeanUtils.copyProperties(attrEntity, attrRespVo);
             // 1.设置分类和分组的名字
             AttrAttrgroupRelationEntity attrAttrgroupRelationEntity = relationDao.selectOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrRespVo.getAttrId()));
-            if (attrAttrgroupRelationEntity != null) {
+            if (attrAttrgroupRelationEntity != null && attrAttrgroupRelationEntity.getAttrGroupId() != null) {
                 attrRespVo.setGroupName(attrGroupDao.selectById(attrAttrgroupRelationEntity.getAttrGroupId()).getAttrGroupName());
             }
 
@@ -133,6 +133,10 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                 attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
             }
         }
+
+        //新增值类型参数
+        attrRespVo.setValueType(attrRespVo.getValueSelect().indexOf(";") == -1 ? 0 : 1);
+
 
         return attrRespVo;
     }

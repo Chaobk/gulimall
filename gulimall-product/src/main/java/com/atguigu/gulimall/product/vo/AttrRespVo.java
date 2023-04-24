@@ -7,5 +7,7 @@ public class AttrRespVo extends AttrVo {
     private String catelogName;
     private String groupName;
 
+    private Integer valueType;
+
     private Long[] catelogPath;
 }
