@@ -80,7 +80,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
 
     @Override
     public PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId) {
-        return queryBaseAttrPage(params, catelogId, null);
+        return queryBaseAttrPage(params, catelogId, "base");
     }
 
     @Override
@@ -227,15 +227,28 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         // 2.当前分组只能关联别的分组没有引用的属性
         // 2.1 当前分类下的其他分组
         List<AttrGroupEntity> attrGroupEntityList = attrGroupDao.selectList(
-                new QueryWrapper<AttrGroupEntity>().eq("catelog_id", catelogId).ne("attr_group_id", attrgroupId));
+                new QueryWrapper<AttrGroupEntity>().eq("catelog_id", catelogId));
+        List<Long> collect = attrGroupEntityList.stream().map(AttrGroupEntity::getAttrGroupId).collect(Collectors.toList());
         // 2.2 这些分组关联的属性
-        if (attrGroupEntityList != null) {
-            List<Long> collect = attrGroupEntityList.stream().map((en) -> en.getAttrGroupId()).collect(Collectors.toList());
-            relationDao.selectList(new QueryWrapper<AttrAttrgroupRelationEntity>().in("attr_group_id", collect));
-        }
-        // 2.3
+        List<AttrAttrgroupRelationEntity> entities = relationDao.selectList(new QueryWrapper<AttrAttrgroupRelationEntity>().in("attr_group_id", collect));
+        List<Long> attrIds = entities.stream().map(item -> {
+            return item.getAttrId();
+        }).collect(Collectors.toList());
 
-        return null;
+        // 2.3 从当前分类的所有属性中移除这些属性
+        QueryWrapper<AttrEntity> wrapper = new QueryWrapper<AttrEntity>().eq("catelog_id", catelogId).eq("attr_type", ProductConstant.AttrEnum.ATTR_TYPE_BASE.getCode());
+        if (attrIds.size() > 0) {
+            wrapper.notIn("attr_id", attrIds);
+        }
+        String key = (String) params.get("key");
+        if (!StringUtils.isEmpty(key)) {
+            wrapper.and((w) -> {
+                w.eq("attr_id", key).or().like("attr_name", key);
+            });
+        }
+        IPage<AttrEntity> page = this.page(new Query<AttrEntity>().getPage(params), wrapper);
+
+        return new PageUtils(page);
     }
 
 }

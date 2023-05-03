@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * 属性&属性分组关联
@@ -36,5 +37,6 @@ public class AttrAttrgroupRelationEntity implements Serializable {
 	 * 属性组内排序
 	 */
 	private Integer attrSort;
+
 
 }
