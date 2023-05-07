@@ -1,5 +1,6 @@
 package com.atguigu.gulimall.product.service.impl;
 
+import com.atguigu.gulimall.product.entity.AttrAttrgroupRelationEntity;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -54,5 +55,6 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
         }
 
     }
+
 
 }
