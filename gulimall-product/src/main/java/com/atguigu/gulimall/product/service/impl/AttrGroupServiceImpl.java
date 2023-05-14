@@ -1,6 +1,7 @@
 package com.atguigu.gulimall.product.service.impl;
 
 import com.atguigu.gulimall.product.entity.AttrAttrgroupRelationEntity;
+import com.atguigu.gulimall.product.entity.AttrEntity;
 import com.atguigu.gulimall.product.service.AttrService;
 import com.atguigu.gulimall.product.vo.AttrGroupRelationVo;
 import com.atguigu.gulimall.product.vo.AttrGroupWithAttrsVo;
@@ -8,6 +9,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -69,20 +71,30 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
 
     }
 
+    /**
+     * 根据分类id查出所有的分组以及这些组里的属性
+     * @param catelogId
+     * @return
+     */
     @Override
     public List<AttrGroupWithAttrsVo> getAttrGroupWithAttrsByCatelogId(Long catelogId) {
         // 1.查询分组信息
-        List<AttrGroupEntity> attrGroupEntities = this.list(new QueryWrapper<AttrGroupEntity>().eq("catlog_id", catelogId));
+        List<AttrGroupEntity> attrGroupEntities = this.list(new QueryWrapper<AttrGroupEntity>().eq("catelog_id", catelogId));
 
         // 2.查询所有属性
-        List<AttrGroupRelationVo> collect = attrGroupEntities.stream().map(group -> {
-            AttrGroupRelationVo attrGroupRelationVo = new AttrGroupRelationVo();
-            BeanUtils.copyProperties(group, attrGroupRelationVo);
-            return attrGroupRelationVo;
+        List<AttrGroupWithAttrsVo> collect = attrGroupEntities.stream().map(group -> {
+            AttrGroupWithAttrsVo attrGroupWithAttrsVo = new AttrGroupWithAttrsVo();
+            BeanUtils.copyProperties(group, attrGroupWithAttrsVo);
+            List<AttrEntity> attrList = attrService.getRelationAttr(attrGroupWithAttrsVo.getAttrGroupId());
+            // 修复无数据情况下，前端forEach报错的bug
+            if (attrList == null) {
+                attrList = Collections.EMPTY_LIST;
+            }
+            attrGroupWithAttrsVo.setAttrs(attrList);
+            return attrGroupWithAttrsVo;
         }).collect(Collectors.toList());
-        // todo 属性查询
 
-        return null;
+        return collect;
     }
 
 

@@ -3,9 +3,11 @@ package com.atguigu.gulimall.product.vo;
 import com.atguigu.gulimall.product.entity.AttrEntity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.Data;
 
 import java.util.List;
 
+@Data
 public class AttrGroupWithAttrsVo {
     /**
      * 分组id

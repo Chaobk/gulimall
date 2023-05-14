@@ -191,7 +191,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             return attr.getAttrId();
         }).collect(Collectors.toList());
         Collection<AttrEntity> attrEntities = null;
-        if (attrIds != null) {
+        if (attrIds != null && attrIds.size() > 0) {
             attrEntities = this.listByIds(attrIds);
         }
 
