@@ -1,7 +1,12 @@
 package com.atguigu.gulimall.product.service.impl;
 
+import com.atguigu.gulimall.product.vo.Images;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,6 +29,18 @@ public class SkuImagesServiceImpl extends ServiceImpl<SkuImagesDao, SkuImagesEnt
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public void saveImages(Long skuId, List<Images> images) {
+        List<SkuImagesEntity> collect = images.stream().map(image -> {
+            SkuImagesEntity skuImagesEntity = new SkuImagesEntity();
+            skuImagesEntity.setSkuId(skuId);
+            skuImagesEntity.setImgUrl(image.getImgUrl());
+            skuImagesEntity.setDefaultImg(image.getDefaultImg());
+            return skuImagesEntity;
+        }).collect(Collectors.toList());
+        this.saveBatch(collect);
     }
 
 }
