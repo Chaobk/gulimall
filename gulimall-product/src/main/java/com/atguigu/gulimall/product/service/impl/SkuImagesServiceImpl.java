@@ -16,6 +16,7 @@ import com.atguigu.common.utils.Query;
 import com.atguigu.gulimall.product.dao.SkuImagesDao;
 import com.atguigu.gulimall.product.entity.SkuImagesEntity;
 import com.atguigu.gulimall.product.service.SkuImagesService;
+import org.springframework.util.StringUtils;
 
 
 @Service("skuImagesService")
@@ -33,13 +34,14 @@ public class SkuImagesServiceImpl extends ServiceImpl<SkuImagesDao, SkuImagesEnt
 
     @Override
     public void saveImages(Long skuId, List<Images> images) {
+        // TODO 没有图片路径的无需保存
         List<SkuImagesEntity> collect = images.stream().map(image -> {
             SkuImagesEntity skuImagesEntity = new SkuImagesEntity();
             skuImagesEntity.setSkuId(skuId);
             skuImagesEntity.setImgUrl(image.getImgUrl());
             skuImagesEntity.setDefaultImg(image.getDefaultImg());
             return skuImagesEntity;
-        }).collect(Collectors.toList());
+        }).filter(item -> !StringUtils.isEmpty(item.getImgUrl())).collect(Collectors.toList());
         this.saveBatch(collect);
     }
 
