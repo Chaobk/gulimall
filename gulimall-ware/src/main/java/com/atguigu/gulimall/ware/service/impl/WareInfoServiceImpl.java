@@ -11,6 +11,7 @@ import com.atguigu.common.utils.Query;
 import com.atguigu.gulimall.ware.dao.WareInfoDao;
 import com.atguigu.gulimall.ware.entity.WareInfoEntity;
 import com.atguigu.gulimall.ware.service.WareInfoService;
+import org.springframework.util.StringUtils;
 
 
 @Service("wareInfoService")
@@ -24,6 +25,27 @@ public class WareInfoServiceImpl extends ServiceImpl<WareInfoDao, WareInfoEntity
         );
 
         return new PageUtils(page);
+    }
+
+    @Override
+    public PageUtils queryPageByCondition(Map<String, Object> params) {
+        QueryWrapper<WareInfoEntity> wrapper = new QueryWrapper<>();
+        String key = (String) params.get("key");
+        if (!StringUtils.isEmpty(key)) {
+            wrapper.and(w-> {
+                w.eq("id", key)
+                        .or().like("name", key)
+                        .or().like("address", key)
+                        .or().like("areacode", key);
+            });
+        }
+        IPage<WareInfoEntity> page = this.page(
+                new Query<WareInfoEntity>().getPage(params),
+                wrapper
+        );
+
+        return new PageUtils(page);
+
     }
 
 }
