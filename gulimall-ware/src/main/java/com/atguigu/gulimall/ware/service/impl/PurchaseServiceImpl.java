@@ -63,6 +63,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
             purchaseId = purchaseEntity.getId();
         }
 
+        // TODO 确认采购但是0，1才可以合单
+
         List<Long> items = mergeVo.getItems();
         Long finalPurchaseId = purchaseId;
         List<PurchaseDetailEntity> collect = items.stream().map(item -> {
@@ -79,6 +81,34 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
         purchaseEntity.setUpdateTime(new Date());
         purchaseEntity.setId(purchaseId);
         this.updateById(purchaseEntity);
+    }
+
+    @Override
+    @Transactional
+    public void received(List<Long> ids) {
+        // 1.确认当前采购单是新建或者已分配状态
+        List<PurchaseEntity> collect = ids.stream().map(id -> {
+                    PurchaseEntity purchaseEntity = this.getById(id);
+                    return purchaseEntity;
+                }).filter(item -> item.getStatus() == WareConstant.PurchaseStatusEnum.CREATED.getCode()
+                        || item.getStatus() == WareConstant.PurchaseStatusEnum.ASSIGNED.getCode())
+                .map(item -> {
+                    item.setStatus(WareConstant.PurchaseStatusEnum.RECEIVE.getCode());
+                    item.setUpdateTime(new Date());
+                    return item;
+                }).collect(Collectors.toList());
+
+        // 2.改变采购单的状态
+        this.updateBatchById(collect);
+
+        // 3.改变采购单所关联的需求的状态
+        List<Long> list = collect.stream().map(item -> item.getId()).collect(Collectors.toList());
+        List<PurchaseDetailEntity> ens = purchaseDetailService.list(new QueryWrapper<PurchaseDetailEntity>().in("purchase_id", list));
+        for (PurchaseDetailEntity en : ens) {
+            en.setStatus(WareConstant.PurchaseDetailStatusEnum.RECEIVE.getCode());
+        }
+        purchaseDetailService.updateBatchById(ens);
+
     }
 
 }

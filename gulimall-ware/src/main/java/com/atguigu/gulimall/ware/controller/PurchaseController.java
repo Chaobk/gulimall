@@ -2,6 +2,7 @@ package com.atguigu.gulimall.ware.controller;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import com.atguigu.gulimall.ware.vo.MergeVo;
@@ -33,6 +34,17 @@ public class PurchaseController {
     public R unreceiveList() {
         PageUtils page = purchaseService.queryPageUnreceivePurchase();
         return R.ok().put("page", page);
+    }
+
+    /**
+     * 领取采购单
+     * @return
+     */
+    @PostMapping("/received")
+    public R received(@RequestBody List<Long> ids) {
+        purchaseService.received(ids);
+
+        return R.ok();
     }
 
     @PostMapping("/merge")
@@ -83,6 +95,7 @@ public class PurchaseController {
     @RequestMapping("/update")
     // @RequiresPermissions("ware:purchase:update")
     public R update(@RequestBody PurchaseEntity purchase){
+        purchase.setUpdateTime(new Date());
 		purchaseService.updateById(purchase);
 
         return R.ok();
