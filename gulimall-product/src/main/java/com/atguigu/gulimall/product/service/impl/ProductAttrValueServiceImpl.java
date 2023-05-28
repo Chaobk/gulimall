@@ -20,6 +20,7 @@ import com.atguigu.common.utils.Query;
 import com.atguigu.gulimall.product.dao.ProductAttrValueDao;
 import com.atguigu.gulimall.product.entity.ProductAttrValueEntity;
 import com.atguigu.gulimall.product.service.ProductAttrValueService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("productAttrValueService")
@@ -44,12 +45,32 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
             ProductAttrValueEntity productAttrValueEntity = new ProductAttrValueEntity();
             BeanUtils.copyProperties(attr, productAttrValueEntity);
             productAttrValueEntity.setSpuId(id);
+            productAttrValueEntity.setAttrValue(attr.getAttrValues());
             productAttrValueEntity.setAttrName(attrService.getById(productAttrValueEntity.getAttrId()).getAttrName());
             productAttrValueEntity.setQuickShow(attr.getShowDesc());
             return productAttrValueEntity;
         }).collect(Collectors.toList());
 
         this.saveBatch(collect);
+    }
+
+    @Override
+    public List<ProductAttrValueEntity> baseAttrListForSpu(Long spuId) {
+        List<ProductAttrValueEntity> list = this.baseMapper.selectList(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id", spuId));
+        return list;
+    }
+
+    @Override
+    @Transactional
+    public void updateSpuAttr(Long spuId, List<ProductAttrValueEntity> entities) {
+        // 删除这个spuId之前对应的所有属性
+        this.baseMapper.delete(new QueryWrapper<ProductAttrValueEntity>().eq("spu_id", spuId));
+
+        // 插入新的数据
+        for (ProductAttrValueEntity entity : entities) {
+            entity.setSpuId(spuId);
+        }
+        this.saveBatch(entities);
     }
 
 }
