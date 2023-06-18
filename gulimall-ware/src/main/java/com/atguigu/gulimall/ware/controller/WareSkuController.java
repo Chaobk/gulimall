@@ -33,7 +33,7 @@ public class WareSkuController {
     public R getSkusHasStock(@RequestBody List<Long> skuIds) {
         // sku_id stock
         List<SkuHasStockVo> list = wareSkuService.getSkusHasStock(skuIds);
-        return R.ok().put("data", list);
+        return R.ok().setData(list);
     }
 
     /**

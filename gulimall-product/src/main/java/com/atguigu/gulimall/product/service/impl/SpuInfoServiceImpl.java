@@ -1,11 +1,15 @@
 package com.atguigu.gulimall.product.service.impl;
 
+import com.alibaba.fastjson.TypeReference;
+import com.atguigu.common.constant.ProductConstant;
+import com.atguigu.common.to.SkuHasStockTo;
 import com.atguigu.common.to.SkuReductionTo;
 import com.atguigu.common.to.SpuBoundsTo;
 import com.atguigu.common.to.es.SkuEsModel;
 import com.atguigu.common.utils.R;
 import com.atguigu.gulimall.product.entity.*;
 import com.atguigu.gulimall.product.feign.CouponFeignService;
+import com.atguigu.gulimall.product.feign.SearchFeignService;
 import com.atguigu.gulimall.product.feign.WareFeignService;
 import com.atguigu.gulimall.product.service.*;
 import com.atguigu.gulimall.product.vo.*;
@@ -64,6 +68,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     WareFeignService wareFeignService;
+
+    @Autowired
+    SearchFeignService searchFeignService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -161,10 +168,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Override
     public void up(Long spuId) {
-        List<SkuEsModel> upProducts = new ArrayList<>();
-
-        //组装需要的数据
-        SkuEsModel skuEsModel = new SkuEsModel();
+        //1.查出当前spuId对应的所有sku信息，品牌的名字
+        List<SkuInfoEntity> skus = skuInfoService.getSkusBySpuId(spuId);
+        List<Long> skuIdList = skus.stream().map(SkuInfoEntity::getSkuId).collect(Collectors.toList());
 
         // TODO 4.查询当前sku的所有可以被用来进行检索规格属性
         List<ProductAttrValueEntity> productAttrValueEntities = productAttrValueService.baseAttrListForSpu(spuId);
@@ -173,28 +179,33 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         }).collect(Collectors.toList());
         List<Long> searchIds = attrService.selectSearchAttrIds(attrIds);
         Set<Long> searchIdsSet = new HashSet<>(searchIds);
-        List<SkuEsModel.Attrs> attrsSearch = productAttrValueEntities.stream().filter(en -> {
-            return searchIdsSet.contains(en.getAttrId());
-        }).map(en -> {
+        List<SkuEsModel.Attrs> attrsSearch = productAttrValueEntities.stream().filter(en -> searchIdsSet.contains(en.getAttrId())).map(en -> {
             SkuEsModel.Attrs attrs = new SkuEsModel.Attrs();
             BeanUtils.copyProperties(en, attrs);
             return attrs;
         }).collect(Collectors.toList());
 
-        //1.查出当前spuId对应的所有sku信息，品牌的名字
-        List<SkuInfoEntity> skus = skuInfoService.getSkusBySpuId(spuId);
 
         // TODO 1.发送远程调用，库存系统是否有库存
-        wareFeignService.getSkusHasStock(skus)
+        Map<Long, Boolean> stockMap = null;
+        try {
+            R skusHasStock = wareFeignService.getSkusHasStock(skuIdList);
+            // TODO getData为null
+            List<SkuHasStockTo> data = skusHasStock.getData(new TypeReference<List<SkuHasStockTo>>(){});
+            stockMap = data.stream().collect(Collectors.toMap(SkuHasStockTo::getSkuId, item -> item.getHasStock()));
+        } catch (Exception e) {
+            log.error("库存服务查询异常：原因{}", e);
+        }
+
         //2.封装每个sku的信息
-        List<SkuEsModel> collect = skus.stream().map(sku -> {
+        Map<Long, Boolean> finalStockMap = stockMap;
+        List<SkuEsModel> upProductList = skus.stream().map(sku -> {
             SkuEsModel esModel = new SkuEsModel();
             BeanUtils.copyProperties(sku, esModel);
             // skuPrice, skuImg, hasStock, hotScore, brandName, brandImg, catalogName, attrs
             esModel.setSkuPrice(sku.getPrice());
             esModel.setSkuImg(sku.getSkuDefaultImg());
-
-
+            esModel.setHasStock(finalStockMap == null ? true : finalStockMap.get(sku.getSkuId()));
 
             // TODO 2.热度评分
             esModel.setHotScore(0L);
@@ -210,6 +221,19 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         }).collect(Collectors.toList());
 
         //TODO 5.将输入发送给es进行保存
+        R r = searchFeignService.productStatusUp(upProductList);
+        if (r.getCode() == 0) {
+            // 成功
+            // TODO 6.修改spu状态
+            this.baseMapper.updateSpuStatus(spuId, ProductConstant.StatusEnum.SPU_UP.getCode());
+        } else {
+            // 接口调用失败
+            // TODO 7.重复调用 接口幂等性 重试机制 ？
+            // Feign调用流程
+            // 1.构造请求数据，将对象转为json
+            // 2.发送请求进行执行（执行成功会解码响应数据）
+            // 3.执行请求会有重试机制
+        }
     }
 
     private void saveSkuInfo(SpuSaveVo vo, SpuInfoEntity spuInfoEntity) {
