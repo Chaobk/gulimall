@@ -111,7 +111,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                             Catelog2Vo.Catelog3Vo catelog3Vo = new Catelog2Vo.Catelog3Vo(item2.getCatId().toString(), item3.getCatId().toString(), item3.getName());
                             return catelog3Vo;
                         }).collect(Collectors.toList());
-                        catelog2Vo.setCatalog3List(Collections.singletonList(catelog3Vos));
+                        catelog2Vo.setCatalog3List(catelog3Vos);
                     }
                     return catelog2Vo;
                 }).collect(Collectors.toList());

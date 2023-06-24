@@ -6,10 +6,11 @@ $(function(){
         $(".header_main_left_a").each(function(){
             var ctgnums= $(this).attr("ctg-data");
             if(ctgnums){
-                var panel=$("<div class='header_main_left_main'></div>");
+                var panel=$("<div class='header_main_left_main' style='display: none'></div>");
                 var panelol=$("<ol class='header_ol'></ol>");
                 var  ctgnumArray = ctgnums.split(",");
                 $.each(ctgnumArray,function (i,ctg1Id) {
+                    console.log("ID:" + ctg1Id);
                     var ctg2list= ctgall[ctg1Id];
                     $.each(ctg2list,function (i,ctg2) {
                         var cata2link=$("<a href='#' style= 'color: #111;' class='aaa'>"+ctg2.name+"  ></a>");

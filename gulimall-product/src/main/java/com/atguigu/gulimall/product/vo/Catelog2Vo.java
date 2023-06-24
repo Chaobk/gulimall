@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Catelog2Vo {
     private String catalog1Id;
-    private List<Object> catalog3List;
+    private List<Catelog3Vo> catalog3List;
 
     private String id;
     private String name;
