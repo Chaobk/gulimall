@@ -17,7 +17,7 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   thymeleaf:
-    cache: false
+    cache: true
 
 
 mybatis-plus:
@@ -30,4 +30,4 @@ mybatis-plus:
 
 logging:
   level:
-    com.atguigu.gulimall: debug
+    com.atguigu.gulimall: error

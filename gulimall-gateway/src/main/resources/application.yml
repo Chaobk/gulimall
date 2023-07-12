@@ -15,7 +15,7 @@ spring:
         - id: product_route
           uri: lb://gulimall-product
           predicates:
-            - Path=/api/product/**
+            - Path=/api/product/**, /hello
           filters:
             - RewritePath=/api/(?<segment>.*), /$\{segment}
 
@@ -51,4 +51,4 @@ spring:
         - id: gulimall_host_route
           uri: lb://gulimall-product
           predicates:
-            - Host=**.gulimall.com
+            - Host=huawei.com,frp-car.top*,8rwdpxgo.shenzhuo.vip:55743,91b9-116-76-10-185.ngrok-free.app
