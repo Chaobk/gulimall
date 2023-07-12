@@ -91,21 +91,26 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Override
     public Map<String, List<Catelog2Vo>> getCatalogJson() {
+        /**
+         *  将多次查数据库，改为查一次
+         */
+        List<CategoryEntity> selectList = baseMapper.selectList(null);
+
         // 1.查出所有1级分类
-        List<CategoryEntity> level1Categorys = getLevel1Categorys();
+        List<CategoryEntity> level1Categorys = getParentCid(selectList, 0L);;
 
         // 2.封装数据
         Map<String, List<Catelog2Vo>> res = level1Categorys.stream().collect(Collectors.toMap(k -> {
             return k.getCatId().toString();
         }, v -> {
             // 1.每一个的一级分类，查到这个一级分类的二级分类
-            List<CategoryEntity> entities = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", v.getCatId()));
+            List<CategoryEntity> entities = getParentCid(selectList, v.getCatId());
             List<Catelog2Vo> catelog2Vos = null;
             if (entities != null) {
                 catelog2Vos = entities.stream().map(item2 -> {
                     Catelog2Vo catelog2Vo = new Catelog2Vo(v.getCatId().toString(), null, item2.getCatId().toString(), item2.getName());
                     // 找当前二级分类的的三级分类封装成vo
-                    List<CategoryEntity> categoryEntities  = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", item2.getCatId()));
+                    List<CategoryEntity> categoryEntities  = getParentCid(selectList, item2.getCatId());
                     if (categoryEntities != null) {
                         List<Catelog2Vo.Catelog3Vo> catelog3Vos = categoryEntities.stream().map(item3 -> {
                             Catelog2Vo.Catelog3Vo catelog3Vo = new Catelog2Vo.Catelog3Vo(item2.getCatId().toString(), item3.getCatId().toString(), item3.getName());
@@ -120,6 +125,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         }));
 
         return res;
+    }
+
+    private List<CategoryEntity> getParentCid(List<CategoryEntity> selectList, Long parentCid) {
+        List<CategoryEntity> collect = selectList.stream().filter(item -> item.getParentCid() == parentCid).collect(Collectors.toList());
+        return collect;
     }
 
     private List<Long> findParentPath(Long catelogId, List<Long> paths) {
