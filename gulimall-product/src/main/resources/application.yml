@@ -1,5 +1,6 @@
 server:
   port: 10001
+  connection-timeout: 5000
 
 spring:
   datasource:

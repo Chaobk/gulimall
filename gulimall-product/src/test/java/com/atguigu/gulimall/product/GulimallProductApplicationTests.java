@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.netflix.client.ClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -29,6 +30,8 @@ class GulimallProductApplicationTests {
     @Autowired
     CategoryService categoryService;
 
+    @Autowired
+    RedissonClient redissonClient;
 
     @Autowired
     StringRedisTemplate stringRedisTemplate;
@@ -59,5 +62,10 @@ class GulimallProductApplicationTests {
         ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
         ops.set("name", "zhangsan_" + UUID.randomUUID());
 
+    }
+
+    @Test
+    public void testRedisson() {
+        System.out.println(redissonClient);
     }
 }
