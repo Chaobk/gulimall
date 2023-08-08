@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.atguigu.gulimall.product.service.CategoryBrandRelationService;
 import com.atguigu.gulimall.product.vo.Catelog2Vo;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -32,6 +34,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Autowired
     StringRedisTemplate redisTemplate;
+
+    @Autowired
+    RedissonClient redissonClient;
 
     @Autowired
     CategoryDao categoryDao;
@@ -118,7 +123,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         String json = ops.get("catalogJson");
         if (!StringUtils.isEmpty(json)) {
             System.out.println("命中缓存");
-            return JSON.parseObject(json, new TypeReference<Map<String, List<Catelog2Vo>>>(){});
+            return JSON.parseObject(json, new TypeReference<Map<String, List<Catelog2Vo>>>() {
+            });
         }
         Map<String, List<Catelog2Vo>> catalogJsonFromDb = getCatalogJsonFromDbWithRedisLock();
 
@@ -171,6 +177,31 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         }
     }
 
+    /**
+     * 缓存数据一致性
+     * 1）双写模式
+     * 2）失效模式
+     * @return
+     */
+    public Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithRedissonLock() {
+        // 1.锁的名字一样，就是同一把锁
+        RLock lock = redissonClient.getLock("catalogJson-lock");
+        lock.lock();
+
+        System.out.println("获取分布式锁成功");
+        // 加锁成功
+        // 设置过期时间
+        Map<String, List<Catelog2Vo>> dataFromDb;
+        try {
+            dataFromDb = getDataFromDb();
+        } finally {
+            lock.unlock();
+        }
+        return dataFromDb;
+
+
+    }
+
 
     private Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithLocalLock() {
 //        Map<String, List<Catelog2Vo>> catalogJson = (Map<String, List<Catelog2Vo>>) cache.get("catalogJson");
@@ -219,7 +250,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                 catelog2Vos = entities.stream().map(item2 -> {
                     Catelog2Vo catelog2Vo = new Catelog2Vo(v.getCatId().toString(), null, item2.getCatId().toString(), item2.getName());
                     // 找当前二级分类的的三级分类封装成vo
-                    List<CategoryEntity> categoryEntities  = getParentCid(selectList, item2.getCatId());
+                    List<CategoryEntity> categoryEntities = getParentCid(selectList, item2.getCatId());
                     if (categoryEntities != null) {
                         List<Catelog2Vo.Catelog3Vo> catelog3Vos = categoryEntities.stream().map(item3 -> {
                             Catelog2Vo.Catelog3Vo catelog3Vo = new Catelog2Vo.Catelog3Vo(item2.getCatId().toString(), item3.getCatId().toString(), item3.getName());
@@ -246,10 +277,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         // 1.收集当前节点id
         paths.add(catelogId);
         CategoryEntity byId = this.getById(catelogId);
-         if (!byId.getParentCid().equals(0L)) {
+        if (!byId.getParentCid().equals(0L)) {
             findParentPath(byId.getParentCid(), paths);
         }
-         return paths;
+        return paths;
     }
 
     /**
