@@ -103,7 +103,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      *              每一个缓存的数据都需要指定要放在哪个名字的缓存
      * @return
      */
-    @Cacheable
+    @Cacheable("category")
     @Override
     public List<CategoryEntity> getLevel1Categorys() {
         System.out.println("getLevel1Categorys。。。。。。被调用");

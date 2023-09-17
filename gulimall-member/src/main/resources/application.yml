@@ -5,12 +5,12 @@ spring:
   datasource:
     username: root
     password: mysql@123
-    url: jdbc:mysql://101.34.94.242/gulimall_ums
+    url: jdbc:mysql://185.242.235.202/gulimall_ums
     driver-class-name: com.mysql.cj.jdbc.Driver
   cloud:
     nacos:
       discovery:
-        server-addr: 101.34.94.242:8848
+        server-addr: 185.242.235.202:8848
   application:
     name: gulimall-member
 
