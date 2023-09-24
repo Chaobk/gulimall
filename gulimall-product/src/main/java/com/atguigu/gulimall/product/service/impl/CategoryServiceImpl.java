@@ -7,7 +7,9 @@ import com.atguigu.gulimall.product.vo.Catelog2Vo;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -89,6 +91,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return parentPath.toArray(new Long[0]);
     }
 
+//    @Caching(evict = {
+//            @CacheEvict(value = "category", key = "'getLevel1Categorys'"),
+//            @CacheEvict(value = "category", key = "'getCatalogJson'")
+//    })
+    @CacheEvict(value = "category", allEntries = true)
     @Transactional
     @Override
     public void updateDetail(CategoryEntity category) {
@@ -103,11 +110,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      *              每一个缓存的数据都需要指定要放在哪个名字的缓存
      * @return
      */
-    @Cacheable("category")
+    @Cacheable(value = "category", key = "#root.method.name")
     @Override
     public List<CategoryEntity> getLevel1Categorys() {
         System.out.println("getLevel1Categorys。。。。。。被调用");
-        List<CategoryEntity> entities = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
+        List<CategoryEntity> entities = null;
+        entities = baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
         return entities;
     }
 
@@ -119,8 +127,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     // 1）升级Lettuce客户端 2）切换使用jedis
     // redisTemplate
     // Lettuce、jedis操作redis的底层客户端。Spring再次封装
-    @Override
-    public Map<String, List<Catelog2Vo>> getCatalogJson() {
+    public Map<String, List<Catelog2Vo>> getCatalogJson2() {
         /**
          * 1、空结果缓存，解决缓存穿透问题
          * 2、设置过期时间（加随机值），解决缓存雪崩
@@ -137,6 +144,42 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         Map<String, List<Catelog2Vo>> catalogJsonFromDb = getCatalogJsonFromDbWithRedisLock();
 
         return catalogJsonFromDb;
+    }
+
+    @Cacheable(value = "category", key="#root.methodName")
+    @Override
+    public Map<String, List<Catelog2Vo>> getCatalogJson() {
+        List<CategoryEntity> selectList = baseMapper.selectList(null);
+
+        // 1.查出所有1级分类
+        List<CategoryEntity> level1Categorys = getParentCid(selectList, 0L);
+        ;
+        // 2.封装数据
+        Map<String, List<Catelog2Vo>> res = level1Categorys.stream().collect(Collectors.toMap(k -> {
+            return k.getCatId().toString();
+        }, v -> {
+            // 1.每一个的一级分类，查到这个一级分类的二级分类
+            List<CategoryEntity> entities = getParentCid(selectList, v.getCatId());
+            List<Catelog2Vo> catelog2Vos = null;
+            if (entities != null) {
+                catelog2Vos = entities.stream().map(item2 -> {
+                    Catelog2Vo catelog2Vo = new Catelog2Vo(v.getCatId().toString(), null, item2.getCatId().toString(), item2.getName());
+                    // 找当前二级分类的的三级分类封装成vo
+                    List<CategoryEntity> categoryEntities = getParentCid(selectList, item2.getCatId());
+                    if (categoryEntities != null) {
+                        List<Catelog2Vo.Catelog3Vo> catelog3Vos = categoryEntities.stream().map(item3 -> {
+                            Catelog2Vo.Catelog3Vo catelog3Vo = new Catelog2Vo.Catelog3Vo(item2.getCatId().toString(), item3.getCatId().toString(), item3.getName());
+                            return catelog3Vo;
+                        }).collect(Collectors.toList());
+                        catelog2Vo.setCatalog3List(catelog3Vos);
+                    }
+                    return catelog2Vo;
+                }).collect(Collectors.toList());
+            }
+            return catelog2Vos;
+        }));
+
+        return res;
     }
 
 

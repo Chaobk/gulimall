@@ -1,0 +1,11 @@
+server:
+  port: 12000
+spring:
+  thymeleaf:
+    cache: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 185.242.235.202:8848
+  application:
+    name: gulimall-search
