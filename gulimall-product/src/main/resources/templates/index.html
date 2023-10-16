@@ -610,7 +610,8 @@
 <script type="text/javascript">
   function search() {
       var keyword=$("#searchText").val()
-      window.location.href="http://search.gulimall.com/search.html?keyword="+keyword;
+      // 没有搞nginx和动静分离，直接写死
+      window.location.href="http://localhost:12000?keyword="+keyword;
   }
 
 </script>

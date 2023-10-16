@@ -2,7 +2,7 @@ server:
   port: 12000
 spring:
   thymeleaf:
-    cache: true
+    cache: false
   cloud:
     nacos:
       discovery:

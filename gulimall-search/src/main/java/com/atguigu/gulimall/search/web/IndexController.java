@@ -1,4 +1,4 @@
-package com.atguigu.gulimall.gulimallsearch.web;
+package com.atguigu.gulimall.search.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
