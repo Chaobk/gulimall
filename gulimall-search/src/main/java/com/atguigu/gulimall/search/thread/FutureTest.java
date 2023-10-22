@@ -39,20 +39,60 @@ public class FutureTest {
 
 
         // 3.thenApplyAsync 能接收上一步结果，有返回值
-        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
-            System.out.println("Runnable start: " + Thread.currentThread().getId());
+//        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+//            System.out.println("Runnable start: " + Thread.currentThread().getId());
+//            int i = 10 / 3;
+//            System.out.println("Runanble end: " + i);
+//            return i;
+//        }).thenApplyAsync((res) -> {
+//            System.out.println("任务2启动了: " + res);
+//            return "hello";
+//        }, executor);
+//        System.out.println(future.get());
+//        System.out.println("main...end...");
+
+
+        /**
+         * 两个都完成
+         */
+        CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("任务1Runnable start: " + Thread.currentThread().getId());
             int i = 10 / 3;
-            System.out.println("Runanble end: " + i);
+            System.out.println("任务1Runanble end: " + i);
             return i;
-        }).thenApplyAsync((res) -> {
-            System.out.println("任务2启动了: " + res);
+        }, executor);
+
+        CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> {
+            System.out.println("任务2Runnable start: " + Thread.currentThread().getId());
+            int i = 10 / 3;
+            System.out.println("任务2Runanble end: " + i);
             return "hello";
         }, executor);
-        System.out.println(future.get());
-        System.out.println("main...end...");
+
+        //         runAfterBoth 获取不到前面流程的执行结果
+//        future1.runAfterBothAsync(future2, () -> {
+//            System.out.println("任务3 start");
+//        }, executor);
+
+        // 可以接收到前面的结果
+        //    /**
+        //     * Performs this operation on the given arguments.
+        //     * @param t the first input argument
+        //     * @param u the second input argument
+        //     */
+        //    void accept(T t, U u);
+//        future1.thenAcceptBothAsync(future2, (f1, f2) -> {
+//            System.out.println("任务3 Runnable start: " + Thread.currentThread().getId());
+//            System.out.printf("%s %s", f1, f2);
+//        }, executor);
+
+        // 可以有返回值
+//        System.out.println(future1.thenCombine(future2, (f1, f2) -> {
+//            return f1 + ": " + f2 + " -> hello";
+//        }).get());
     }
 
-    static class RunableTest1 implements Runnable{
+    static class RunableTest1 implements Runnable {
 
         @Override
         public void run() {

@@ -1,9 +1,7 @@
+/*
 package com.atguigu.gulimall.thirdparty.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClient;
-import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.common.utils.BinaryUtil;
 import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.PolicyConditions;
@@ -35,9 +33,11 @@ import java.util.Map;
 @RestController
 public class OssController {
 
-    /**
+    */
+/**
      *
-     */
+     *//*
+
     private static final long serialVersionUID = 5522372203700422672L;
 
     @Autowired
@@ -97,12 +97,14 @@ public class OssController {
         return R.ok().put("data", respMap);
     }
 
-    /**
+    */
+/**
      * 获取public key
      *
      * @param url
      * @return
-     */
+     *//*
+
     @SuppressWarnings({"finally"})
     public String executeGet(String url) {
         BufferedReader in = null;
@@ -139,13 +141,15 @@ public class OssController {
         }
     }
 
-    /**
+    */
+/**
      * 获取Post消息体
      *
      * @param is
      * @param contentLen
      * @return
-     */
+     *//*
+
     public String GetPostBody(InputStream is, int contentLen) {
         if (contentLen > 0) {
             int readLen = 0;
@@ -166,7 +170,8 @@ public class OssController {
         return "";
     }
 
-    /**
+    */
+/**
      * 验证上传回调的Request
      *
      * @param request
@@ -174,7 +179,8 @@ public class OssController {
      * @return
      * @throws NumberFormatException
      * @throws IOException
-     */
+     *//*
+
     protected boolean VerifyOSSCallbackRequest(HttpServletRequest request, String ossCallbackBody)
             throws NumberFormatException, IOException {
         boolean ret = false;
@@ -203,9 +209,11 @@ public class OssController {
         return ret;
     }
 
-    /**
+    */
+/**
      * Post请求
-     */
+     *//*
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String ossCallbackBody = GetPostBody(request.getInputStream(),
@@ -220,14 +228,16 @@ public class OssController {
         }
     }
 
-    /**
+    */
+/**
      * 验证RSA
      *
      * @param content
      * @param sign
      * @param publicKey
      * @return
-     */
+     *//*
+
     public static boolean doCheck(String content, byte[] sign, String publicKey) {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -246,15 +256,18 @@ public class OssController {
         return false;
     }
 
-    /**
+    */
+/**
      * 服务器响应结果
+     *
      *
      * @param request
      * @param response
      * @param results
      * @param status
      * @throws IOException
-     */
+     *//*
+
     private void response(HttpServletRequest request, HttpServletResponse response, String results, int status)
             throws IOException {
         String callbackFunName = request.getParameter("callback");
@@ -267,9 +280,11 @@ public class OssController {
         response.flushBuffer();
     }
 
-    /**
+    */
+/**
      * 服务器响应结果
-     */
+     *//*
+
     private void response(HttpServletRequest request, HttpServletResponse response, String results) throws IOException {
         String callbackFunName = request.getParameter("callback");
         if (callbackFunName == null || callbackFunName.equalsIgnoreCase(""))
@@ -281,3 +296,4 @@ public class OssController {
     }
 
 }
+*/

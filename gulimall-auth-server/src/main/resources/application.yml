@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: gulimall-auth-server
+  thymeleaf:
+    cache: false
+  redis:
+    host: 185.242.235.202
+    password: redis@123
+    port: 6379
+
+
+server:
+  port: 20000
